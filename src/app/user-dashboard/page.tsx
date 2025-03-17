@@ -8,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/com
 import { DashboardShell } from "./_components/dashboard-shell"
 import { DashboardHeader } from "./_components/dashboard-header"
 import { Button } from "@/components/ui/button"
+import loader from "@/components/loader"
 import { Progress } from "@/components/ui/progress"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 
@@ -15,25 +16,49 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 const dashboardData = {
   purchaseCount: 12,
   totalIncome: 45600,
-  teamCount: 28,
+  mainTeam: 12,
+  activeTeam: 22,
+  totalTeam: 28,
   referralIncome: 12500,
   salary: 25000,
   promotionalIncome: 8100,
   reward: 5000,
   tour: "Goa Retreat - June 2025",
-  activeTeam: 22,
-  powerTeam: 28,
   daysRemaining: 23,
 }
 
 export default function DashboardPage() {
   const [greeting, setGreeting] = useState("Good day")
-  const [userData, setUserData] = useState({
-    title: "Mr.",
-    firstName: "Mehul",
-    surname: "Singh",
-  })
+  // const [userData, setUserData] = useState({
+  //   title: "Mr.",
+  //   firstName: "Mehul",
+  //   surname: "Singh",
+  // })
+  const [user, setUser] = useState<{ id: string; name: string; email: string } | null>(null);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/auth/profile");
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error);
+        }
+
+        setUser(data);
+      } catch (err: unknown) {
+        if (err instanceof Error)
+        setError(err.message);
+      } finally{
+        setLoading(false);
+      }
+    }
+
+    fetchUser();
+  }, []);
   useEffect(() => {
     const hour = new Date().getHours()
     if (hour < 12) setGreeting("Good morning")
@@ -44,15 +69,18 @@ export default function DashboardPage() {
     // fetchUserData().then(data => setUserData(data))
   }, [])
 
+
+
   return (
     <DashboardShell>
       <div className="flex flex-col space-y-6">
         {/* Top Section with User Welcome and Trial Info */}
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 bg-gradient-to-r from-orange-50 to-amber-50 p-6 rounded-xl border border-amber-100">
           <div>
-            <h1 className="text-2xl font-bold tracking-tight text-orange-800">
-              {greeting}, {userData.title} {userData.firstName} {userData.surname}
-            </h1>
+          <h1 className="text-2xl font-bold tracking-tight text-orange-800">
+  {greeting}, {user ? user.name : "Guest"}
+</h1>
+
             <p className="text-orange-600 mt-1">Welcome to your dashboard. Here&#39;s an overview of your account.</p>
           </div>
           
@@ -103,7 +131,7 @@ export default function DashboardPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-amber-900">{dashboardData.teamCount} Members</div>
+              <div className="text-3xl font-bold text-amber-900">{dashboardData.totalTeam} Members</div>
               <div className="flex items-center mt-1 text-sm text-amber-700">
                 <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
                 <span>4 new members this month</span>
@@ -114,15 +142,28 @@ export default function DashboardPage() {
           <Card className="bg-gradient-to-br from-yellow-50 to-yellow-100 border-yellow-200 shadow-sm hover:shadow transition-all">
             <CardHeader className="pb-2">
               <div className="flex justify-between items-center">
-                <CardTitle className="text-lg font-semibold text-yellow-800">Active Team</CardTitle>
+                <CardTitle className="text-lg font-semibold text-yellow-800">Team Breakdown</CardTitle>
                 <div className="p-2 bg-white rounded-full">
                   <Award className="h-5 w-5 text-yellow-600" />
                 </div>
               </div>
             </CardHeader>
             <CardContent>
-              <div className="text-3xl font-bold text-yellow-900">{dashboardData.activeTeam} / {dashboardData.powerTeam}</div>
-              <div className="flex items-center mt-1 text-sm text-yellow-700">
+              <div className="grid grid-cols-3 gap-2">
+                <div className="text-center">
+                  <div className="text-xs font-medium text-yellow-700">Main</div>
+                  <div className="text-xl font-bold text-yellow-900">{dashboardData.mainTeam}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs font-medium text-yellow-700">Active</div>
+                  <div className="text-xl font-bold text-yellow-900">{dashboardData.activeTeam}</div>
+                </div>
+                <div className="text-center">
+                  <div className="text-xs font-medium text-yellow-700">Total</div>
+                  <div className="text-xl font-bold text-yellow-900">{dashboardData.totalTeam}</div>
+                </div>
+              </div>
+              <div className="flex items-center mt-3 text-sm text-yellow-700">
                 <TrendingUp className="h-4 w-4 mr-1 text-green-600" />
                 <span>3 active members this month</span>
               </div>

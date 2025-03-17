@@ -6,6 +6,8 @@ import { Tiro_Devanagari_Hindi } from "next/font/google"
 import "./globals.css"
 import type React from "react"
 import Navbar from "@/components/navbar"
+import { AuthProvider } from "@/components/Auth-provider"
+import Footer from "@/components/footer"
 
 const devanagari = Tiro_Devanagari_Hindi({
   weight: "400",
@@ -31,7 +33,10 @@ export default function RootLayout({
     <html lang="hi" className={devanagari.className}>
       <body>
         <ClientLayout>
+        <AuthProvider>
           {children}
+        </AuthProvider>
+     
         </ClientLayout>
       </body>
     </html>
@@ -45,8 +50,9 @@ function ClientLayout({ children }: { children: React.ReactNode }) {
   // Conditionally render the Navbar only on the home page (`/`)
   return (
     <>
-      {pathname === "/" && <Navbar />}
+      {pathname === "/"  && <Navbar />}
       {children}
+      {pathname === "/" && <Footer />}
     </>
   )
 }
